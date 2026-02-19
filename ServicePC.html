@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ServicePC — Servicio Técnico de PC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080c10;
+      --surface: #0d1117;
+      --card: #111820;
+      --accent: #00e5ff;
+      --accent2: #ff6b35;
+      --text: #c9d8e8;
+      --muted: #4a6070;
+      --border: rgba(0,229,255,0.12);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(8,12,16,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+    .logo span { color: var(--accent2); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+    nav ul a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: var(--accent); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #000 !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 2px;
+    }
+    .nav-cta:hover { background: #00bcd4 !important; color: #000 !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      max-width: 700px;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0.85;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--text);
+      max-width: 520px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      padding: 0.85rem 2rem;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { background: #00bcd4; transform: translateY(-2px); }
+
+    .btn-ghost {
+      border: 1px solid var(--muted);
+      color: var(--text);
+      padding: 0.85rem 2rem;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-around;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 2.2rem;
+      color: var(--accent);
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── SECTION ── */
+    section {
+      padding: 6rem 4rem;
+      position: relative;
+    }
+
+    .section-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent2);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ── SERVICES ── */
+    #servicios { background: var(--surface); }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .service-card {
+      background: var(--card);
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      background: var(--accent);
+      transition: height 0.4s ease;
+    }
+    .service-card:hover { background: #141d26; }
+    .service-card:hover::before { height: 100%; }
+
+    .service-icon {
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .service-card p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    /* ── WHY US ── */
+    #nosotros { background: var(--bg); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .why-text .section-sub { max-width: 100%; margin-bottom: 2rem; }
+
+    .why-points {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .why-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .why-check {
+      color: var(--accent);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .why-point p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .why-point strong { color: #fff; font-weight: 700; }
+
+    .why-visual {
+      position: relative;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circuit-box {
+      width: 300px;
+      height: 300px;
+      border: 1px solid var(--border);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circuit-box::before, .circuit-box::after {
+      content: '';
+      position: absolute;
+      background: var(--accent);
+    }
+    .circuit-box::before {
+      width: 40px; height: 1px;
+      top: -1px; left: 30px;
+    }
+    .circuit-box::after {
+      width: 1px; height: 40px;
+      bottom: 30px; right: -1px;
+    }
+
+    .circuit-inner {
+      width: 200px;
+      height: 200px;
+      border: 1px solid rgba(0,229,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 20s linear infinite;
+    }
+
+    .circuit-core {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-align: center;
+      letter-spacing: 0.1em;
+      animation: spin 20s linear infinite reverse;
+    }
+
+    /* ── PROCESS ── */
+    #proceso { background: var(--surface); }
+
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+
+    .process-steps::before {
+      content: '';
+      position: absolute;
+      top: 2rem;
+      left: 12.5%;
+      right: 12.5%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .step {
+      padding: 0 1.5rem;
+      text-align: center;
+    }
+
+    .step-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+
+    .step p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── CONTACT ── */
+    #contacto { background: var(--bg); }
+
+    .contact-wrapper {
+      max-width: 680px;
+    }
+
+    .contact-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .contact-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .contact-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+
+    .contact-card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .contact-card h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .contact-card p {
+      font-size: 1rem;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer .logo { font-size: 1.1rem; }
+    footer p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .blink { animation: blink 1s step-end infinite; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { display: none; }
+      .hero { padding: 7rem 1.5rem 4rem; }
+      section { padding: 4rem 1.5rem; }
+      .stats-bar { padding: 2rem 1.5rem; }
+      .why-grid { grid-template-columns: 1fr; }
+      .why-visual { display: none; }
+      .process-steps { grid-template-columns: 1fr 1fr; }
+      .process-steps::before { display: none; }
+      footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Service<span>PC</span></div>
+    <ul>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="#contacto" class="nav-cta">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <p class="hero-tag">// Servicio Técnico Profesional <span class="blink">_</span></p>
+      <h1>Tu PC en <em>manos expertas</em></h1>
+      <p>Reparamos, optimizamos y protegemos tu equipo con diagnóstico preciso y soluciones reales. Sin vueltas, sin excusas — solo resultados.</p>
+      <div class="hero-btns">
+        <a href="#contacto" class="btn-primary">Contactanos</a>
+        <a href="#servicios" class="btn-ghost">Ver servicios</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <!--
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num">+500</span>
+      <span class="stat-label">Equipos reparados</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">98%</span>
+      <span class="stat-label">Clientes satisfechos</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">24hs</span>
+      <span class="stat-label">Diagnóstico rápido</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">5+</span>
+      <span class="stat-label">Años de experiencia</span>
+    </div>
+  </div>
+-->
+  <!-- SERVICIOS -->
+  <section id="servicios">
+    <p class="section-tag">// Lo que hacemos</p>
+    <h2 class="section-title">Nuestros servicios</h2>
+    <p class="section-sub">Cubrimos todo lo que tu PC necesita, desde fallas de hardware hasta problemas de software, redes y optimización general.</p>
+
+    <div class="services-grid">
+
+      <div class="service-card">
+        <span class="service-icon">🔧</span>
+        <h3>Reparación de Hardware</h3>
+        <p>Diagnóstico y reparación,cambios de disco rígido, RAM, Graficas, y más. Reemplazamos componentes con piezas de calidad.</p>
+      </div>
+
+      <div class="service-card">
+        <span class="service-icon">💿</span>
+        <h3>Formateo e Instalación de Software</h3>
+        <p>Formateo completo con instalación de Windows, drivers y programas esenciales. Tu equipo como nuevo, listo para usar desde el primer momento.</p>
+      </div>
+
+      <div class="service-card">
+        <span class="service-icon">🦠</span>
+        <h3>Limpieza de Virus y Malware</h3>
+        <p>Eliminamos todo tipo de amenazas: virus, adware y programas no deseados. Configuramos protección para que no vuelva a ocurrir.</p>
+      </div>
+
+<!--      <div class="service-card">
+        <span class="service-icon">🌐</span>
+        <h3>Redes y Conectividad</h3>
+        <p>Configuración de redes Wi-Fi, resolución de problemas de conectividad, optimización de señal y armado de redes para hogares y pequeñas empresas.</p>
+      </div> -->
+
+      <div class="service-card">
+        <span class="service-icon">⚡</span>
+        <h3>Optimización y Rendimiento</h3>
+        <p>¿Tu PC lenta? La analizamos a fondo, limpiamos el sistema, gestionamos el arranque y hacemos que vuelva a volar sin necesidad de comprar un equipo nuevo.</p>
+      </div>
+
+      <div class="service-card">
+        <span class="service-icon">💾</span>
+        <h3>Recuperación de Datos</h3>
+        <p>Recuperamos archivos perdidos por formateos accidentales, discos dañados o fallas del sistema. Trabajamos con cuidado para salvar lo que más importa.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- NOSOTROS -->
+  <section id="nosotros">
+    <div class="why-grid">
+      <div class="why-text">
+        <p class="section-tag">// Por qué elegirnos</p>
+        <h2 class="section-title">Técnicos reales, soluciones reales</h2>
+        <p class="section-sub">No somos un call center. Somos personas que se toman el tiempo de escuchar el problema, entender tu equipo y darte una solución honesta.</p>
+        <div class="why-points">
+          <div class="why-point">
+            <span class="why-check">[✓]</span>
+            <p><strong>Diagnóstico gratuito.</strong> Antes de hacer nada, te contamos qué tiene tu equipo y cuánto va a costar. Sin sorpresas.</p>
+          </div>
+          <div class="why-point">
+            <span class="why-check">[✓]</span>
+            <p><strong>Transparencia total.</strong> Te explicamos el problema en términos simples. Siempre sabés qué estamos haciendo y por qué.</p>
+          </div>
+          <div class="why-point">
+            <span class="why-check">[✓]</span>
+            <p><strong>Garantía en el trabajo.</strong> Todos nuestros servicios tienen garantía. Si algo falla después de la reparación, lo resolvemos.</p>
+          </div>
+          <div class="why-point">
+            <span class="why-check">[✓]</span>
+            <p><strong>Entrega en tiempo y forma.</strong> Respetamos los tiempos acordados porque sabemos que tu PC es importante.</p>
+          </div>
+        </div>
+      </div>
+      <div class="why-visual">
+        <div class="circuit-box">
+          <div class="circuit-inner">
+            <div class="circuit-core">
+              DIAGNÓSTICO<br/>────────<br/>REPARACIÓN<br/>────────<br/>ENTREGA
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESO -->
+  <section id="proceso">
+    <p class="section-tag">// Cómo trabajamos</p>
+    <h2 class="section-title">Simple y sin vueltas</h2>
+    <p class="section-sub">Trabajar con nosotros es sencillo. Cuatro pasos y tu equipo vuelve a casa funcionando.</p>
+
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Consulta</h3>
+        <p>Nos contás el problema por chat, teléfono o en persona. Sin compromisos.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Diagnóstico</h3>
+        <p>Revisamos el equipo a fondo y te damos un presupuesto claro sin costo.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Reparación</h3>
+        <p>Trabajamos con precisión y te avisamos el progreso en tiempo real.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Entrega</h3>
+        <p>Retirás tu equipo funcionando al 100%. Con garantía y soporte post-servicio.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto">
+    <p class="section-tag">// Hablemos</p>
+    <h2 class="section-title">¿Problemas con tu PC?</h2>
+    <p class="section-sub">Contactanos por el medio que prefieras. Respondemos rápido y sin complicaciones.</p>
+
+    <div class="contact-wrapper">
+      <div class="contact-cards">
+        <a href="https://wa.me/5491155835070" class="contact-card">
+          <div class="contact-card-icon">💬</div>
+          <h4>WhatsApp</h4>
+          <p>+54 9 11 5583-5070</p>
+        </a>
+        <a href="mailto:servicepc.da@gmail.com" class="contact-card">
+          <div class="contact-card-icon">📧</div>
+          <h4>Email</h4>
+          <p>servicepc.da@gmail.com</p>
+        </a>
+        <div class="contact-card">
+          <div class="contact-card-icon">📍</div>
+          <h4>Ubicación</h4>
+          <p>La Plata, Buenos Aires</p>
+        </div>
+<!--        <div class="contact-card">
+          <div class="contact-card-icon">🕐</div>
+          <h4>Horario</h4>
+          <p>Lun–Sáb 9 a 20hs</p>
+        </div>
+      </div> -->
+      <br/>
+      <a href="https://wa.me/5491100000000" class="btn-primary" style="margin-top:1rem;">
+        Escribirnos por WhatsApp →
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="logo">Service<span>PC</span></div>
+    <p>© 2025 ServicePC — Servicio Técnico de PC. La Plata, Buenos Aires.</p>
+    <p style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);">STATUS: ONLINE_</p>
+  </footer>
+
+</body>
+</html>
